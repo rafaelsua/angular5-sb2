@@ -7,7 +7,7 @@ import { OktaCallbackComponent, OktaAuthModule } from '@okta/okta-angular';
 
 
 import { AppComponent } from './app.component';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { CarService } from './shared/car/car.service';
 import { CarListComponent } from './car-list/car-list.component';
 import { GiphyServiceService } from './shared/giphy/giphy-service.service';
@@ -15,9 +15,15 @@ import { CarEditComponent } from './car-edit/car-edit.component';
 
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
+import { AuthInterceptor } from './shared/okta/auth-interceptor';
+import { HomeComponent } from './home/home.component';
 
 const appRoutes: Routes = [
-  { path: '', redirectTo: '/car-list', pathMatch: 'full' },
+  {path: '', redirectTo: '/home', pathMatch: 'full'},
+  {
+    path: 'home',
+    component: HomeComponent
+  },
   {
     path: 'car-list',
     component: CarListComponent
@@ -29,6 +35,10 @@ const appRoutes: Routes = [
   {
     path: 'car-edit/:id',
     component: CarEditComponent
+  },
+  {
+    path: 'implicit/callback',
+    component: OktaCallbackComponent
   }
 ];
 
@@ -42,7 +52,8 @@ const config = {
   declarations: [
     AppComponent,
     CarListComponent,
-    CarEditComponent
+    CarEditComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,
@@ -57,7 +68,8 @@ const config = {
     FormsModule,
     RouterModule.forRoot(appRoutes)
   ],
-  providers: [ CarService, GiphyServiceService],
+  providers: [ CarService, GiphyServiceService,
+    {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true}],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
